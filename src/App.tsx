@@ -677,12 +677,35 @@ DROP TRIGGER BeforeInsertStudent;
     {
       id: 21,
       question: "21. What is a transaction in SQL?",
-      answer: "A transaction is a sequence of SQL operations that are treated as a single unit. \nIt ensures that either all operations are completed successfully or none are applied, maintaining data integrity.",
+      answer: "A transaction in SQL is a set of operations that are done together. If one fails, all changes can be rolled back to keep the database safe.",
       codeExample: `
--- Start a transaction
+-- Full example of a transaction
 START TRANSACTION;
--- Perform some operations
-UPDATE accounts SET balance 
+UPDATE accounts SET balance = balance - 100 WHERE account_id = 1;
+UPDATE accounts SET balance = balance + 100 WHERE account_id = 2;
+COMMIT;
+-- This transfers 100 from account 1 to account 2.
+-- If any operation fails, you can use ROLLBACK to undo all changes.
+
+----------------------------------------------------------------------------
+second example of a transaction
+BEGIN;  -- Start the transaction
+
+-- Step 1: Deduct ₹1000 from Account A
+UPDATE accounts
+SET balance = balance - 1000
+WHERE id = 1;
+
+-- Step 2: Add ₹1000 to Account B
+UPDATE accounts
+SET balance = balance + 1000
+WHERE id = 2;
+
+COMMIT;  -- Save the changes permanently
+
+----------------------------------------------------------------------------
+BEGIN; and START TRANSACTION; are both used to start a SQL transaction. They work the same way
+— it's just a matter of style or database preference.
       `
     },
     {
@@ -701,21 +724,808 @@ SET NEW.column_name = value;
     },
     {
       id: 23,
-      question: "",
-      answer: "",
-      codeExample: ``
+      question: "23. What are ACID properties in a database?",
+      answer: " sdsda",
+      codeExample: `
+🔹 A – Atomicity
+All or nothing.
+Either the entire transaction happens or nothing happens.
+Example: Money is deducted and added — both must succeed.
+
+🔹 C – Consistency
+Data stays correct.
+Transaction keeps the database in a valid state.
+Example: Total money before and after a transfer stays the same.
+
+🔹 I – Isolation
+Transactions don’t interfere with each other.
+If many users do operations at the same time, each works as if alone.
+
+🔹 D – Durability
+Data is saved permanently.
+Once a transaction is complete, changes are not lost — even if the system crashes.
+`
     },
     {
-      id: 1,
-      question: "",
-      answer: "",
-      codeExample: ``
+      id: 24,
+      question: "24. What are clustered and non-clustered indexes?",
+      answer: "A clustered index sorts and stores the table data physically. \nA non-clustered index creates a separate lookup to find data faster.",
+      codeExample: `
+-- Clustered Index
+CREATE CLUSTERED INDEX idx_student_id
+ON students(student_id);
+
+-- Non-Clustered Index
+CREATE NONCLUSTERED INDEX idx_student_name
+ON students(name);
+
+-------------------------------------------------------------------------------------------
+
+🎓 Table: students
+| student\_id | name   | age | city     |
+| ----------- | ------ | --- | -------- |
+| 3           | Raj    | 21  | Keshod   |
+| 1           | Aman   | 22  | Junagadh |
+| 4           | Zoya   | 20  | Surat    |
+| 2           | Bhavya | 23  | Rajkot   |
+
+-------------------------------------------------------------------------------------------
+
+✅ Clustered Index on student_id
+When you create a clustered index on student_id, the table is physically sorted by that column:
+
+📘 After applying clustered index:
+| student\_id | name   | age | city     |
+| ----------- | ------ | --- | -------- |
+| 1           | Aman   | 22  | Junagadh |
+| 2           | Bhavya | 23  | Rajkot   |
+| 3           | Raj    | 21  | Keshod   |
+| 4           | Zoya   | 20  | Surat    |
+
+-------------------------------------------------------------------------------------------
+
+✅ Non-Clustered Index on name
+Creates a separate structure with a pointer to the data: creat new structure or new table
+
+📗 Non-clustered index:
+| name   | Pointer to student\_id |
+| ------ | ---------------------- |
+| Aman   | → 1                    |
+| Bhavya | → 2                    |
+| Raj    | → 3                    |
+| Zoya   | → 4                    |
+
+`
     },
     {
-      id: 1,
-      question: "",
+      id: 25,
+      question: "25. What is a composite key?",
+      answer: "A composite key is a combination of two or more columns in a table that can uniquely identify a row. \nIt is used when no single column can serve as a primary key. \nthis used like two different table columns are used to create a new table.",
+      codeExample: `
+📘 Simple Example:
+Imagine a Marks table:
+
+| Student\_ID | Subject\_ID | Marks |
+| ----------- | ----------- | ----- |
+| 1           | 101         | 85    |
+| 1           | 102         | 90    |
+| 2           | 101         | 88    |
+
+
+Student_ID alone is not unique.
+Subject_ID alone is not unique.
+
+But together, Student_ID + Subject_ID is unique.
+
+🗝️ This combination is a composite key.
+
+
+🧾 SQL Example:
+CREATE TABLE Marks (
+  Student_ID INT,
+  Subject_ID INT,
+  Marks INT,
+  PRIMARY KEY (Student_ID, Subject_ID)
+);
+`
+    },
+    {
+      id: 26,
+      question: "26. What is the use of CASE in SQL?",
+      answer: "The CASE statement is used to create conditional logic in SQL queries. \nIt allows you to return different values based on different conditions.",
+      codeExample: `
+✅ Syntax:
+SELECT
+  column_name,
+  CASE
+    WHEN condition1 THEN result1
+    WHEN condition2 THEN result2
+    ELSE default_result
+  END AS alias_name
+FROM table_name;
+
+------------------------------------------------------------------------------
+
+🧾 Example:
+Suppose you have a students table:
+
+| name  | marks |
+| ----- | ----- |
+| Raj   | 85    |
+| Priya | 45    |
+| Amit  | 70    |
+
+------------------------------------------------------------------------------
+
+You want to add a "Result" column:
+If marks ≥ 50 → "Pass"
+Else → "Fail"
+
+------------------------------------------------------------------------------
+
+SELECT
+  name,
+  marks,
+  CASE
+    WHEN marks >= 50 THEN 'Pass'
+    ELSE 'Fail'
+  END AS result
+FROM students;
+
+------------------------------------------------------------------------------
+
+🔍 Output:
+
+| name  | marks | result |
+| ----- | ----- | ------ |
+| Raj   | 85    | Pass   |
+| Priya | 45    | Fail   |
+| Amit  | 70    | Pass   |
+
+`
+    },
+    {
+      id: 27.,
+      question: "27. How can you find duplicate records in a table?",
+      answer: "To find duplicate records in a table, you can use the GROUP BY clause along with HAVING to filter records that appear more than once.",
+      codeExample: `
+✅ Example:
+Assume you have a table called students:
+
+| id | name  | email                                   |
+| -- | ----- | --------------------------------------- |
+| 1  | Raj   | [raj@mail.com](mailto:raj@mail.com)     |
+| 2  | Priya | [priya@mail.com](mailto:priya@mail.com) |
+| 3  | Raj   | [raj@mail.com](mailto:raj@mail.com)     |
+| 4  | Amit  | [amit@mail.com](mailto:amit@mail.com)   |
+
+------------------------------------------------------------------------------
+
+To find duplicate name and email:
+
+SELECT name, email, COUNT(*)
+FROM students
+GROUP BY name, email
+HAVING COUNT(*) > 1;
+
+------------------------------------------------------------------------------
+
+🔍 Output:
+| name | email                               | count |
+| ---- | ----------------------------------- | ----- |
+| Raj  | [raj@mail.com](mailto:raj@mail.com) | 2     |
+`
+    },
+    {
+      id: 28,
+      question: "28. How to remove duplicate value",
+      answer: "To remove duplicate values from a table, you can use the DELETE statement with a subquery to identify duplicates.",
+      codeExample: `
+✅ Example Table: students
+| id | name  | email                                     |
+| -- | ----- | ----------------------------------------- |
+| 1  | Raj   | 	raj@gmail.com                            |
+| 2  | Priya | 	priya@gmail.com                          |
+| 3  | Raj   | 	raj@gmail.com                            |
+| 4  | Aman  | aman@gmail.com                            |
+| 5  | Raj   |	raj@gmail.com                            |
+
+------------------------------------------------------------------------------
+
+SQL Query :
+DELETE s1
+FROM students s1
+JOIN students s2
+ON s1.name = s2.name AND s1.email = s2.email
+WHERE s1.id > s2.id;
+
+------------------------------------------------------------------------------
+
+🔹 What the JOIN would produce:
+
+| s1.id | s1.name | s1.email                            | s2.id | s2.name | s2.email                            |
+| ----- | ------- | ----------------------------------- | ----- | ------- | ----------------------------------- |
+| 3     | Raj     | [raj@mail.com](mailto:raj@mail.com) | 1     | Raj     | [raj@mail.com](mailto:raj@mail.com) |
+| 5     | Raj     | [raj@mail.com](mailto:raj@mail.com) | 1     | Raj     | [raj@mail.com](mailto:raj@mail.com) |
+| 5     | Raj     | [raj@mail.com](mailto:raj@mail.com) | 3     | Raj     | [raj@mail.com](mailto:raj@mail.com) |
+
+------------------------------------------------------------------------------
+
+✅ Final Clean Table After Deleting Duplicates:
+
+| id | name  | email                                   |
+| -- | ----- | --------------------------------------- |
+| 1  | Raj   | [raj@mail.com](mailto:raj@mail.com)     |
+| 2  | Priya | [priya@mail.com](mailto:priya@mail.com) |
+| 4  | Aman  | [aman@mail.com](mailto:aman@mail.com)   |
+
+
+
+Second method :
+
+DELETE FROM students
+WHERE id NOT IN (
+  SELECT MIN(id)
+  FROM students
+  GROUP BY name, email
+);
+
+🔸 Step 1: The subquery
+SELECT MIN(id)
+FROM students
+GROUP BY name, email;
+
+This finds the lowest id (first one entered) for each unique combination of name and email.
+
+Result of Subquery:
+| MIN(id) |             |
+| ------- | ----------- |
+| 1       | ← First Raj |
+| 2       | ← Priya     |
+| 4       | ← Aman      |
+
+
+🔸 Step 2: The outer query
+DELETE FROM students
+WHERE id NOT IN (...);
+
+This means:
+❌ Delete every row whose id is NOT in that list: [1, 2, 4]
+
+`
+    },
+    {
+      id: 29,
+      question: "29. How do you write a query to get the second highest salary?",
+      answer: "To get the second highest salary, you can use the following SQL query. ",
+      codeExample: `
+📌 Let's take this salary table:
+| id | name  | salary |  
+| -- | ----- | ------ |
+| 1  | Raj   | 50000  |
+| 2  | Priya | 60000  |
+| 3  | Aman  | 70000  |
+| 4  | Rani  | 80000  |
+| 5  | Soham | 70000  |
+
+------------------------------------------------------------------------------
+
+Now run this query:
+
+SELECT MAX(salary)
+FROM employees
+WHERE salary < (
+  SELECT MAX(salary) FROM employees
+);
+
+Step-by-step:
+1. Find max salary:
+      SELECT MAX(salary) FROM employees;
+      → 80000
+
+2. Now use WHERE salary < 80000, so it considers:
+
+      70000 ✅
+
+      60000 ✅
+
+      50000 ✅
+
+3. Among these three, we now use:
+      SELECT MAX(salary) FROM employees WHERE salary < 80000;
+      → 70000
+
+------------------------------------------------------------------------------
+
+Second Method:
+SELECT DISTINCT salary
+FROM employees
+ORDER BY salary DESC
+LIMIT 1 OFFSET 1;
+
+
+🔍 Breakdown:
+| Keyword                | Meaning                                                 |
+| ---------------------- | ------------------------------------------------------- |
+| SELECT DISTINCT salary | Gets all unique salary values (removes duplicates).     |
+| ORDER BY salary DESC   | Sorts salaries in descending order (highest to lowest). |
+| LIMIT 1                | Limits the result to only 1 row.                        |
+| OFFSET 1               | Skips the first row (i.e., the highest salary).         |
+
+
+💡 Example table:
+| id | name  | salary |
+| -- | ----- | ------ |
+| 1  | Raj   | 50000  |
+| 2  | Priya | 70000  |
+| 3  | Aman  | 80000  |
+| 4  | Rani  | 70000  |
+| 5  | Soham | 60000  |
+
+
+Steps it follows:
+1. SELECT DISTINCT salary:
+  → 80000, 70000, 60000, 50000
+
+2.ORDER BY salary DESC:
+  → 80000, 70000, 60000, 50000
+
+3.OFFSET 1:
+  → Skips 80000
+
+4.LIMIT 1:
+  → Returns 70000 ✅ (this is the second highest)
+`
+    },
+    {
+      id: 30,
+      question: "30. What are window functions in SQL (like RANK(), DENSE_RANK(), ROW_NUMBER())?",
+      answer: "Window functions perform calculations across a set of rows related to the current row. \nThey are used for ranking, calculating running totals, and more.",
+      codeExample: `
+ROW_NUMBER() → Unique number to each row
+
+RANK() → Same rank for ties, skips next number
+
+DENSE_RANK() → Same rank for ties, no skip
+
+
+🧾 Example Table: employees
+| id | name  | department | salary |
+| -- | ----- | ---------- | ------ |
+| 1  | Raj   | IT         | 70000  |
+| 2  | Priya | IT         | 80000  |
+| 3  | Aman  | HR         | 60000  |
+| 4  | Rani  | IT         | 80000  |
+| 5  | Soham | HR         | 60000  |
+
+------------------------------------------------------------------------------------------
+
+🧪 Example Query (ranking in each department by salary):
+SELECT 
+  name, department, salary,
+  ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS row_num,
+  RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS rank,
+  DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dense_rank
+FROM employees;
+
+------------------------------------------------------------------------------------------
+
+✅ Output:
+| name  | department | salary | row_num | rank | dense_rank |
+| ----- | ---------- | ------ | --------| ---- | ---------  |
+| Priya | IT         | 80000  | 1       | 1    | 1          |
+| Rani  | IT         | 80000  | 2       | 1    | 1          |
+| Raj   | IT         | 70000  | 3       | 3    | 2          |
+| Aman  | HR         | 60000  | 1       | 1    | 1          |
+| Soham | HR         | 60000  | 2       | 1    | 1          |
+`
+    },
+    {
+      id: 31,
+      question: "31. What is a cursor in SQL?",
+      answer: "A cursor is a tool in SQL used to process each row one at a time from a result set. It's helpful when you need to perform row-by-row operations instead of working with the entire table at once.",
+      codeExample: `
+ Simple Example:
+| id | name   | salary |
+| -- | ------ | ------ |
+| 1  | Raj    | 30000  |
+| 2  | Neha   | 45000  |
+| 3  | Ramesh | 60000  |
+
+
+You want to increase salary by 10% if salary is less than 50000.
+
+A cursor helps you:
+  1. Check each row one-by-one.
+  2. If the salary is below 50000, increase it by 10%.
+
+
+
+🧪 Example in MySQL:
+
+DECLARE emp_name VARCHAR(100);
+DECLARE emp_salary INT;
+DECLARE done INT DEFAULT FALSE;
+
+-- Create a cursor
+DECLARE emp_cursor CURSOR FOR 
+  SELECT name, salary FROM employees;
+
+-- Handle when no more rows
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+-- Open the cursor
+OPEN emp_cursor;
+
+-- Loop through each row
+read_loop: LOOP
+  FETCH emp_cursor INTO emp_name, emp_salary;
+
+  IF done THEN
+    LEAVE read_loop;
+  END IF;
+
+  -- Custom logic
+  IF emp_salary < 50000 THEN
+    -- give 10% bonus, just an example
+    UPDATE employees SET salary = salary * 1.1 WHERE name = emp_name;
+  END IF;
+
+END LOOP;
+
+-- Close the cursor
+CLOSE emp_cursor;
+
+`
+    },
+    {
+      id: 32,
+      question: "32. What are the different types of relationships in a database?",
+      answer: "There are three main types of relationships in a database: \n1. One-to-One (1:1) \n2. One-to-Many (1:N) \n3. Many-to-Many (M:N)",
+      codeExample: `
+-- One-to-One
+CREATE TABLE Students (
+  student_id INT PRIMARY KEY,
+  name VARCHAR(100)
+  );
+CREATE TABLE StudentDetails (
+  student_id INT PRIMARY KEY,
+  address VARCHAR(255),
+  FOREIGN KEY (student_id) REFERENCES Students(student_id)
+  ); 
+
+-- One-to-Many
+CREATE TABLE Students (
+  student_id INT PRIMARY KEY,
+  name VARCHAR(100)
+  );
+CREATE TABLE Courses (
+  course_id INT PRIMARY KEY,
+  student_id INT,
+  course_name VARCHAR(100),
+  FOREIGN KEY (student_id) REFERENCES Students(student_id)
+  );
+
+-- Many-to-Many
+CREATE TABLE Students (
+  student_id INT PRIMARY KEY,
+  name VARCHAR(100)
+  );
+CREATE TABLE Courses (
+  course_id INT PRIMARY KEY,
+  course_name VARCHAR(100)
+  );
+CREATE TABLE StudentCourses (
+  student_id INT,
+  course_id INT,
+  PRIMARY KEY (student_id, course_id),
+  FOREIGN KEY (student_id) REFERENCES Students(student_id),
+  FOREIGN KEY (course_id) REFERENCES Courses(course_id)
+  );
+
+-- many-to-many relationship this look like this in table
+| student_id | course_id |
+| ----------- | --------- |
+| 1           | 101       |
+| 1           | 102       |
+| 2           | 101       |
+| 2           | 103       |
+| 3           | 102       |
+| 3           | 103       |
+
+------------------------------------------------------------------------------------------
+ One-to-One (1:1)
+👉 One record in Table A is related to one record in Table B.
+🔐 Often used for splitting rarely used data into separate tables.
+
+Example:
+Users table and UserProfiles table.
+Each user has only one profile, and each profile belongs to only one user.
+
+
+2. One-to-Many (1:N) 🔥 Most common
+👉 One record in Table A can be related to many records in Table B, but each record in Table B relates to only one in Table A.
+
+Example:
+Customers and Orders
+One customer can place many orders.
+Each order is linked to one customer.
+
+
+3. Many-to-Many (M:N)
+👉 Many records in Table A can relate to many in Table B.
+✅ Requires a junction (bridge) table.
+
+Example:
+Students and Courses
+A student can enroll in many courses, and a course can have many students.
+A third table like StudentCourses is used to link them.
+
+`
+    },
+    {
+      id: 33,
+      question: "33. What is the difference between schema and table?",
+      answer: "🔹 Schema \n\tA schema is like a folder or container. \n\tIt organizes and groups related database objects — such as tables, views, functions, procedures, etc. \n\tHelps in managing access, permissions, and database structure. \n\n🧠 Think of it as: \n\tA bookshelf (schema) that holds many books (tables). \n------------------------------------------------------------------------------------------------------\n🔹 Table \n\tA table stores data in rows and columns. \n\tEach table is inside a schema. \n\tContains actual records like names, emails, prices, etc. \n\n🧠 Think of it as: \n\tA book (table) with pages full of actual data.",
+      codeExample: `
+-- Create a schema
+CREATE SCHEMA school;
+
+-- Create a table inside that schema
+CREATE TABLE school.students (
+    id INT PRIMARY KEY,
+    name VARCHAR(50),
+    age INT
+);
+
+
+school is the schema
+students is the table inside the schema`
+    },
+    {
+      id: 34,
+      question: "43. What is data integrity?",
+      answer: "Data Integrity means ensuring the accuracy, consistency, and reliability of data in a database. x\nData integrity refers to the accuracy and consistency of data in a database. \nIt ensures that data is reliable, valid, and protected from unauthorized access or corruption.",
+      codeExample: `
+-- Example of data integrity constraints
+CREATE TABLE Employees (
+    id INT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    age INT CHECK (age >= 18),
+    department_id INT,
+    FOREIGN KEY (department_id) REFERENCES Departments(id)
+);
+-- This table ensures:
+-- 1. Each employee has a unique ID (PRIMARY KEY).
+-- 2. Name cannot be NULL (NOT NULL).
+-- 3. Email must be unique (UNIQUE).
+-- 4. Age must be 18 or older (CHECK).
+
+
+
+🔹 Types of Data Integrity:
+
+| Type                   | Description                                                                |
+| ---------------------- | -------------------------------------------------------------------------- |
+| Entity Integrity       | Ensures each row in a table is unique (usually via a Primary Key)          |
+| Referential Integrity  | Ensures foreign keys correctly reference data in another table             |
+| Domain Integrity       | Ensures the data type, format, and valid range (like age must be a number) |
+| User-Defined Integrity | Custom rules (like salary must be > 0) enforced through constraints        |
+
+`
+    },
+    {
+      id: 35,
+      question: "35. What is sharding in databases?",
+      answer: "Sharding is the process of dividing a large database into smaller parts (shards) to improve performance and scalability by distributing the data across multiple servers or databases. \n\n Sharding = Splitting a large table/data into smaller parts stored in different places (servers/databases).",
+      codeExample: `
+🔸 Main Table Before Sharding:
+
+-- users table (before sharding)
+user_id | name      | country
+--------|-----------|---------
+1       | Raj       | India
+2       | Ankit     | India
+1000001 | John      | USA
+1000002 | Alice     | USA
+
+
+🔹 After Sharding – Split into 2 Tables:
+
+users_shard_india
+-- Users with user_id ≤ 1000000
+user_id | name   | country
+--------|--------|---------
+1       | Raj    | India
+2       | Ankit  | India
+
+
+users_shard_usa
+-- Users with user_id > 1000000
+user_id | name   | country
+--------|--------|---------
+1000001 | John   | USA
+1000002 | Alice  | USA
+
+------------------------------------------------------------------------------------------
+
+
+✅ 1. Create Shard Tables
+
+--users_shard_india
+CREATE TABLE users_shard_india AS
+SELECT * FROM users
+WHERE user_id <= 1000000;
+
+
+--users_shard_usa
+CREATE TABLE users_shard_usa AS
+SELECT * FROM users
+WHERE user_id > 1000000;
+
+🔎 2. Check the Data
+SELECT * FROM users_shard_india;
+SELECT * FROM users_shard_usa;
+
+`
+    },
+    {
+      id: 36,
+      question: "36. What is the difference between OLTP and OLAP?",
       answer: "",
-      codeExample: ``
+      codeExample: `
+🔹 OLTP (Online Transaction Processing)
+  Purpose: Handles day-to-day transactions.
+  Operations: Insert, Update, Delete (e.g., placing an order).
+  Speed: Very fast for read/write operations.
+  Data: Current, real-time data.
+  Example: ATM transactions, online shopping, bank entries.
+✅ Use case: "Add a new customer", "Update order status".
+
+
+🔹 OLAP (Online Analytical Processing)
+  Purpose: Helps in analyzing and reporting data.
+  Operations: Complex queries for summaries, trends, insights.
+  Speed: Optimized for reading large volumes of data.
+  Data: Historical data (aggregated).
+  Example: Sales analysis, market trends, reports.
+✅ Use case: "What were total sales last year?", "Top 5 selling items".
+
+
+🔄 Simple Comparison:
+| Feature   | OLTP                    | OLAP                        |
+| --------- | ----------------------- | --------------------------- |
+| Use       | Day-to-day transactions | Data analysis and reporting |
+| Data type | Current data            | Historical data             |
+| Queries   | Simple, fast            | Complex, slower             |
+| Example   | Booking ticket          | Analyzing sales by region   |
+`
+    },
+    {
+      id: 37,
+      question: "37. What is database locking and deadlock?",
+      answer: "Database locking is a mechanism to control access to data in a database. \nIt prevents multiple transactions from modifying the same data simultaneously, ensuring data integrity. \n\nA deadlock occurs when two or more transactions are waiting for each other to release locks, causing them to be stuck indefinitely.",
+      codeExample: `
+🔹 What is Database Locking?
+  Locking is a mechanism used by the database to prevent multiple users from modifying the same data at the same time.
+
+✅ Why it's used:
+To ensure data consistency and avoid conflicts.
+
+🔸 Example:
+If User A is updating a row, the database locks it so User B can’t update it at the same time.
+
+------------------------------------------------------------------------------------------
+
+🔹 What is Deadlock?
+  A deadlock happens when two or more users are waiting for each other to release a lock — and none of them can proceed.
+
+📌 Think of it like:
+
+User A locks Row 1, wants Row 2
+User B locks Row 2, wants Row 1
+Both are stuck waiting — this is a deadlock.
+
+------------------------------------------------------------------------------------------
+
+🗃 Example Setup (Assume you have a bank_accounts table):
+CREATE TABLE bank_accounts (
+    id INT PRIMARY KEY,
+    name VARCHAR(50),
+    balance INT
+);
+
+INSERT INTO bank_accounts VALUES
+(1, 'Alice', 1000),
+(2, 'Bob', 1000);
+
+🧠 Scenario to Demonstrate Deadlock (Using 2 sessions):
+
+✅ Session 1 (User A):
+BEGIN;
+-- Lock Alice's row
+UPDATE bank_accounts SET balance = balance - 100 WHERE id = 1;
+-- Wait to update Bob’s row later
+
+
+✅ Session 2 (User B):
+BEGIN;
+-- Lock Bob's row
+UPDATE bank_accounts SET balance = balance - 100 WHERE id = 2;
+-- Now tries to update Alice's row (already locked by Session 1)
+UPDATE bank_accounts SET balance = balance + 100 WHERE id = 1;
+
+
+🔄 Back to Session 1:
+-- Now tries to update Bob’s row (already locked by Session 2)
+UPDATE bank_accounts SET balance = balance + 100 WHERE id = 2;
+
+
+
+💡 How to Resolve:
+The database will detect the deadlock and automatically cancel one of the sessions with an error like:
+
+ERROR: deadlock detected
+
+`
+    },
+    {
+      id: 38,
+      question: "38. How do you optimize a slow SQL query?",
+      answer: "",
+      codeExample: `
+
+✅ 1. Use Indexes Wisely
+Add indexes to columns used in WHERE, JOIN, ORDER BY.
+
+CREATE INDEX idx_name ON students(name);
+
+
+
+✅ **2. Avoid SELECT ***
+Only select the columns you need.
+
+-- Bad
+SELECT * FROM students;
+
+-- Good
+SELECT name, email FROM students;
+
+
+
+✅ 3. Use WHERE to Filter Early
+Always filter unnecessary rows early.
+
+SELECT name FROM students WHERE city = 'Keshod';
+
+
+
+✅ 4. Avoid Functions on Indexed Columns
+Don’t apply functions like LOWER() or YEAR() on indexed columns in WHERE.
+
+
+
+✅ 5. Use JOINS Smartly
+Ensure correct JOIN conditions and indexes on joined columns.
+
+
+
+✅ 6. Use LIMIT for Large Results
+
+SELECT * FROM students LIMIT 100;
+
+
+
+✅ 7. Analyze Execution Plan
+Use EXPLAIN before your query to see how it runs.
+
+EXPLAIN SELECT name FROM students WHERE city = 'Keshod';
+
+
+
+✅ 8. Normalize or Denormalize Based on Use Case
+Normalize for update speed and denormalize for read speed.`
     },
 
     
