@@ -57,7 +57,76 @@ ORDER BY salary DESC;
 
 GROUP BY → groups similar data.
 
-ORDER BY → arranges data by column values.`
+ORDER BY → arranges data by column values.
+
+
+-------------------------------------------------------------------------------
+
+📊 What is GROUP BY in SQL?
+The GROUP BY clause is used to group rows that have the same values in specific columns and 
+then perform aggregate functions (like COUNT, SUM, AVG, etc.) on each group.
+
+
+🧠 Syntax:
+SELECT column_name, AGGREGATE_FUNCTION(column_name)
+FROM table_name
+GROUP BY column_name;
+
+
+✅ Example:
+Let’s say you have a table called employees:
+
+| id | name    | department | salary |
+| -- | ------- | ---------- | ------ |
+| 1  | Alice   | HR         | 50000  |
+| 2  | Bob     | IT         | 60000  |
+| 3  | Charlie | IT         | 65000  |
+| 4  | David   | HR         | 52000  |
+| 5  | Eva     | Sales      | 45000  |
+
+
+📌 Query:
+SELECT department, AVG(salary)
+FROM employees
+GROUP BY department;
+
+
+📤 Output:
+| department | avg     |
+| ---------- | ------- |
+| HR         | 51000.0 |
+| IT         | 62500.0 |
+| Sales      | 45000.0 |
+
+This groups employees by their department and calculates the average salary for each department.
+
+-------------------------------------------------------------------------------
+
+🎯 Common Aggregate Functions with GROUP BY:
+| Function  | Description                |
+| --------- | -------------------------- |
+| COUNT() | Number of rows in each group |
+| SUM()   | Total value                  |
+| AVG()   | Average value                |
+| MIN()   | Smallest value               |
+| MAX()   | Largest value                |
+
+
+❗ Important Rules:
+
+Every column in SELECT must either be in GROUP BY or be an aggregate function.
+GROUP BY is often used with WHERE and HAVING.
+
+
+🛠️ Example with HAVING:
+
+SELECT department, COUNT(*) AS emp_count
+FROM employees
+GROUP BY department
+HAVING COUNT(*) > 1;
+
+→ Shows only departments that have more than 1 employee.
+`
     },
     {
       id: 4,
@@ -78,7 +147,7 @@ HAVING COUNT(*) > 5;
     {
       id: 5,
       question: "5. What is the difference between INNER JOIN, LEFT JOIN, RIGHT JOIN, and FULL JOIN?",
-      answer: "",
+      answer: "Default JOIN = INNER JOIN",
       codeExample: `
 👩‍💼 Table: Employees
 emp_id	name	dept_id
@@ -421,6 +490,48 @@ The database will use the raj_name_index index to search faster.
 
 This removes the index named raj_name_index.
 It does not delete any data from the students table — just the index.
+
+-------------------------------------------------------------------------------------
+
+Yes, you're right — the query:
+
+SELECT * FROM employees WHERE name = 'John';
+
+will work perfectly fine without creating an index. ✅
+But here's the key point:
+
+🔍 With vs. Without Index
+| Case              | What Happens                                                                                                                                                              |
+| ----------------  | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ❌ Without Index | The database scans every row in the employees table to find where name = John. This is called a full table scan, which is slow for large tables.                          |
+| ✅ With Index    | The database uses the index on name to quickly find only the rows that match 'John', which is much faster, especially when the table has thousands or millions of rows.   |
+
+-------------------------------------------------------------------------------------
+
+🎯 How to Choose Which Columns to Index:
+
+| Situation                     | Index it?   | Reason                               |
+| ----------------------------- | ---------   | ------------------------------------ |
+| Used in WHERE clause often    | ✅ Yes     | Speeds up searching                  |
+| Used in JOINs                 | ✅ Yes     | Speeds up joining two tables         |
+| Used in ORDER BY or GROUP BY  | ✅ Yes     | Helps sort/group faster              |
+| Frequently updated column     | ❌ No      | Index slows down INSERT/UPDATE       |
+| Low uniqueness (e.g., gender) | ❌ No      | Index not useful for repeated values |
+
+-------------------------------------------------------------------------------------
+
+❌ Disadvantages of Using Indexes in DBMS
+
+| 🚩 Problem                               | 📖 Explanation                                                                                                               |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------ ---------------- |
+| 1. Slower INSERT, UPDATE, DELETE         | Every time you add, change, or remove data, the database also needs to update the index. This can slow down write operations. |
+| 2. Takes extra storage                   | Indexes require additional disk space — sometimes large if you index many columns.                                            |
+| 3. Not useful for small tables           | For small tables, scanning the whole table is already fast — an index may not improve speed much.                             |
+| 4. Not useful on low-cardinality columns | If a column has repeated values (like gender = 'Male/Female'), the index won’t help much.                                     |
+| 5. Can be misused                        | If you index too many columns, it can slow down performance overall instead of helping.                                       |
+| 6. Can cause query plan confusion        | The database might choose the wrong index if multiple indexes exist, leading to slower queries.                               |
+| 7. Requires maintenance                  | Indexes may become fragmented over time and need rebuilding or optimization.                                                  |
+
 
   `
     },
@@ -1483,7 +1594,7 @@ CREATE INDEX idx_name ON students(name);
 
 
 
-✅ **2. Avoid SELECT ***
+✅ 2. Avoid SELECT *
 Only select the columns you need.
 
 -- Bad
