@@ -1638,7 +1638,625 @@ EXPLAIN SELECT name FROM students WHERE city = 'Keshod';
 ✅ 8. Normalize or Denormalize Based on Use Case
 Normalize for update speed and denormalize for read speed.`
     },
+    {
+      id: 1.1,
+      question: "DBMS questions start",
+      answer: "",
+      codeExample: ``
+    },
+    {
+      id: 39,
+      question: "39. What is a DBMS and how is it different from RDBMS?",
+      answer: "DBMS (Database Management System) is software that allows users to create, store, manage, and retrieve data from a database. \nRDBMS (Relational Database Management System) is a type of DBMS that stores data in tables (also called relations) with rows and columns, and enforces relationships between tables using foreign keys.",
+      codeExample: `
+Examples of DBMS:
 
+Microsoft Access
+File-based systems
+SQLite (basic use)
+
+Examples of RDBMS:
+
+MySQL
+PostgreSQL
+Oracle
+Microsoft SQL Server
+
+
+Key Differences Between DBMS and RDBMS:
+
+| Feature               | DBMS                                            | RDBMS                                     |
+| --------------------- | ----------------------------------------------- | ----------------------------------------- |
+| Data Storage          | Stores data as files or hierarchical structures | Stores data in tables (rows and columns)  |
+| Relationships         | Does not support relationships                  | Supports relationships using foreign keys |
+| Data Integrity        | Low data integrity                              | High data integrity with constraints      |
+| Normalization         | Not supported or limited                        | Fully supports normalization              |
+| Multi-user Access     | Limited                                         | Supports multiple users                   |
+| Examples              | MS Access, file system                          | MySQL, PostgreSQL, Oracle                 |
+
+`
+    },
+    {
+      id: 40,
+      question: "40. Explain primary key vs. unique key.",
+      answer: "🔑 Primary Key \n\tA primary key uniquely identifies each record (row) in a table. \n\tOnly one primary key is allowed per table. \n\tCannot be NULL.\n\tEnsures uniqueness and not null values. \n\n🔐 Unique Key \n\tA unique key also ensures that values in a column (or set of columns) are unique. \n\tCan be multiple unique keys in a table. \n\tCan have NULL values (but only one NULL per unique column in most databases like MySQL).",
+      codeExample: `
+-- Example of Primary Key:
+CREATE TABLE Students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50)
+);
+
+-- Example of Unique Key:
+CREATE TABLE Employees (
+    emp_id INT PRIMARY KEY,
+    email VARCHAR(100) UNIQUE
+);
+
+
+ Comparison Table:
+
+| Feature               | Primary Key                  | Unique Key                               |
+| --------------------  | ---------------------------- | ---------------------------------------- |
+| Uniqueness            | Yes                          | Yes                                      |
+| NULL Allowed?         | ❌ No                        | ✅ Yes (usually one NULL)               |
+| Number per Table      | 1 only                       | Multiple allowed                         |
+| Purpose               | Identifies each row uniquely | Ensures uniqueness in specific column(s) |
+`
+    },
+    {
+      id: 41,
+      question: "41. What is SQL injection, and how do you prevent it?",
+      answer: "SQL Injection is a hacking technique where a bad person tries to trick your website into running their own SQL code to: \n\tLogin without a password, \n\tSteal or delete data, \n\tOr take control of the database.",
+      codeExample: `
+🔐 Simple Example:
+
+Imagine this login form:
+
+| Username: | admin |
+| Password: | 1234 |
+
+Your website runs this SQL:
+  SELECT * FROM users WHERE username = 'admin' AND password = '1234';
+
+
+
+Now a hacker types this:
+
+| Username: | admin' -- |
+| Password: | (anything) |
+
+So the SQL becomes:
+SELECT * FROM users WHERE username = 'admin' --' AND password = '...';
+
+👉 The -- means comment, so the password check is ignored!
+💥 Hacker logs in without a password!
+
+----------------------------------------------------------------------------------------
+
+✅ How to Stop This (Prevention):
+Use Parameterized Queries (Safe Queries):
+
+Instead of this (bad):
+  # ❌ BAD
+  query = "SELECT * FROM users WHERE username = '" + user + "' AND password = '" + pwd + "'"
+
+Do this (good):
+  # ✅ GOOD
+  cursor.execute("SELECT * FROM users WHERE username = %s AND password = %s", (user, pwd))
+
+This keeps the input separate from the SQL, so it can’t be used to inject code.
+
+----------------------------------------------------------------------------------------
+
+🛡️ Easy Ways to Prevent SQL Injection:
+
+| Method                      | Explanation                                                  |
+| --------------------------- | ------------------------------------------------------------ |
+| ✅ Parameterized Queries    | Safest way to write SQL                                      |
+| ✅ Input Validation         | Check that the user enters proper data (like no '--' or ')  |
+| ✅ Use ORM (like Django)    | It writes safe SQL for you                                   |
+| ✅ Hide error messages      | Don’t show SQL errors to users                               |
+
+
+
+
+`
+
+    },
+    {
+      id: 42,
+      question: "42. When should you use a NoSQL database over a relational one?",
+      answer: "",
+      codeExample: `
+✅ Use NoSQL when:
+
+| Scenario                                         | Why NoSQL is better                                                                                   |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| 1. You have unstructured or semi-structured data | NoSQL can handle JSON, documents, key-value, or graphs — perfect for flexible data.                   |
+| 2. Data changes frequently                       | Schema-less design means you don’t need to define columns — you can change structure anytime.         |
+| 3. You need horizontal scalability (Big Data)    | NoSQL is built to scale across many servers, good for huge volumes of data (e.g., Facebook, Netflix). |
+| 4. You want high-speed read/write                | Ideal for apps like real-time analytics, caching, chat apps, etc.                                     |
+| 5. You don’t need complex joins or transactions  | NoSQL doesn’t do joins well — it’s great when your data is simple and document-based.                 |
+
+-----------------------------------------------------------------------------------------
+
+❌ Avoid NoSQL when:
+
+| Situation                               | Use Relational (SQL) instead                                                    |
+| --------------------------------------- | ------------------------------------------------------------------------------- |
+| You need strong ACID transactions       | Like banking systems where accuracy is critical                                 |
+| You work with complex relationships     | Such as many-to-many (e.g., school databases with students, teachers, subjects) |
+| Your data is highly structured          | Fixed tables and schemas work better in SQL                                     |
+| You rely on joins and foreign keys      | These are SQL strengths                                                         |
+
+
+`
+    },
+    {
+      id: 43,
+      question: "43. How does DBMS ensure concurrency control?",
+      answer: "Concurrency control ensures that multiple users can access the database at the same time, without causing problems like: \n\t🔁 Data inconsistency \n\t📝 Lost updates \n\t🔐 Dirty reads (reading uncommitted data) \n\t⚠️ Deadlocks",
+      codeExample: `
+🛡️ How DBMS Ensures Concurrency Control
+
+1. Locks
+| Type               | What it does                           |
+| ------------------ | -------------------------------------- |
+| Shared Lock        | Multiple users can read, but not write |
+| Exclusive Lock     | Only one user can read/write at a time |
+
+
+2. Isolation Levels (from ACID)
+DBMS allows you to set how isolated each transaction is:
+
+| Isolation Level  | Prevents             | But allows           |
+| -----------------| -------------------- | -------------------- |
+| Read Uncommitted | Nothing              | Dirty reads          |
+| Read Committed   | Dirty reads          | Non-repeatable reads |
+| Repeatable Read  | Non-repeatable reads | Phantom reads        |
+| Serializable     | All issues           | Slower performance   |
+
+
+3. Timestamp Ordering
+
+Each transaction gets a timestamp
+DBMS executes transactions in timestamp order to avoid conflicts
+
+
+4. Optimistic Concurrency Control
+
+No locks are used initially
+DBMS checks for conflicts at commit time
+Good for systems where conflicts are rare
+
+
+5. Multiversion Concurrency Control (MVCC)
+
+Each transaction sees a snapshot of the data
+Readers don’t block writers, and vice versa
+Used by databases like PostgreSQL, Oracle
+
+
+
+`
+    },
+    {
+      id: 44,
+      question: "44. What are materialized views and when should they be used?",
+      answer: "A Materialized View is like a precomputed and stored result of a SQL query.",
+      codeExample: `
+🔄 Difference from a normal view:
+| View Type         | Stored?   | Recomputed?             | Example                       |
+| ------------------| -------   | ----------------------  | ----------------------------- |
+| Normal View       | ❌ No    | ✅ Every time you query | Like a saved query only       |
+| Materialized View | ✅ Yes   | ❌ No (until refreshed) | Like a snapshot of query data |
+
+
+📦 Think of it like:
+You have a query:
+
+SELECT department, AVG(salary) FROM employees GROUP BY department;
+
+If it's a normal view, this runs every time you access it.
+If it’s a materialized view, the result is stored in a table.
+
+
+✅ When to Use Materialized Views
+| Use Case                   | Why It's a Good Fit                                                  |
+| -------------------------- | -------------------------------------------------------------------- |
+| Heavy, complex queries     | Pre-compute once and avoid re-running it every time                  |
+| Dashboards & reports       | Fast response for charts/summary data                                |
+| Rarely changing data       | Ideal when data updates infrequently, but reads are frequent         |
+| Aggregated data            | Example: sales summaries, user stats, etc.                           |
+
+
+❌ When NOT to Use
+| Scenario                    | Why Not                                               |
+| --------------------------- | ----------------------------------------------------- |
+| Real-time data required     | Materialized views can get stale unless refreshed     |
+| Frequent data changes       | Need to refresh often, which can hurt performance     |
+| Very large data changes     | Refreshing the view might be slow                     |
+
+
+-----------------------------------------------------------------------------------------
+
+what meaning of Precomputed
+
+  Something that is already calculated or processed in advance, so you don't need to calculate it again.
+
+
+what meaning of snapshot of query
+
+      Think of a snapshot like taking a photo of something at a specific moment in time.
+
+So, a snapshot of a query means:
+Taking the result of a SQL query right now, saving it, and using that saved result later, without 
+re-running the query again.
+
+
+`
+    },
+    {
+      id: 45,
+      question: "45. What is a surrogate key? How is it different from a natural key?",
+      answer: "",
+      codeExample: `
+🔑 What is a Surrogate Key?
+  A Surrogate Key is a fake or artificial key that is used to uniquely identify a row in a table. It has no real-world meaning.
+
+🧩 It is usually an auto-increment number or UUID (Unique Identifier).
+
+
+
+🌿 What is a Natural Key?
+  A Natural Key is a real-world, meaningful column that uniquely identifies a record.
+
+🧩 Example: Email address, Social Security Number, Student Roll Number — these exist outside the database too.
+
+
+🔄 Key Differences:
+| Feature                   | Surrogate Key                   | Natural Key                   |
+| -----------------------   | ------------------------------  | ----------------------------- |
+| ✅ Meaning in real world | ❌ No                           | ✅ Yes                       |
+| 🧱 Type                  | System-generated (e.g., ID)      | Data-based (e.g., email, SSN)|
+| 🔁 Changes often?        | ❌ Never                        | ✅ Might change              |
+| ⚡ Performance           | ✅ Better for joins/indexing    | ❌ Can be slower             |
+| 🧠 Easy to understand?   | ❌ Not directly (just a number) | ✅ More meaningful           |
+
+
+🧪 Example:
+Let's say we have a table of students:
+
+| student_id (Surrogate Key)      | email (Natural Key)                           | name  |
+| ------------------------------- | --------------------------------------------- | ----- |
+| 1                               | [alice@example.com](mailto:alice@example.com) | Alice |
+| 2                               | [bob@example.com](mailto:bob@example.com)     | Bob   |
+
+student_id is a surrogate key (just a number created by the system)
+email is a natural key (unique and meaningful)
+
+-----------------------------------------------------------------------------------------
+
+CREATE TABLE students (
+    id INT PRIMARY KEY AUTO_INCREMENT,  -- Surrogate key
+    name VARCHAR(100),
+    email VARCHAR(100) UNIQUE           -- Natural key (optional)
+);
+
+
+Insert Data:
+
+INSERT INTO students (name, email) VALUES ('Alice', 'alice@example.com');
+INSERT INTO students (name, email) VALUES ('Bob', 'bob@example.com');
+
+The database will assign id = 1, id = 2, etc. automatically.
+
+
+✅ 2. Implementing a Natural Key
+If you want to use a natural key (e.g., email) as the primary key:
+
+CREATE TABLE students (
+    email VARCHAR(100) PRIMARY KEY,     -- Natural key
+    name VARCHAR(100)
+);
+
+
+Insert Data:
+
+INSERT INTO students (email, name) VALUES ('alice@example.com', 'Alice');
+INSERT INTO students (email, name) VALUES ('bob@example.com', 'Bob');
+
+Now, email acts as the unique identifier.
+
+
+
+🔍 Query Examples:
+
+With Surrogate Key:
+
+  SELECT * FROM students WHERE id = 1;
+
+  
+With Natural Key:
+
+  SELECT * FROM students WHERE email = 'alice@example.com';
+
+`
+    },
+    {
+      id: 46,
+      question: "46. What are the different isolation levels in transactions?",
+      answer: "what meaning of Isolation \n\tEach transaction runs separately — like it's the only one running.",
+      codeExample: `
+🔹 1. Read Uncommitted (💥 Least Safe)
+
+❗ You can see uncommitted (temporary) changes made by others
+This may give wrong or incomplete results
+
+Example:
+
+Transaction A changes balance to ₹1000 but hasn’t saved (committed) it
+Transaction B reads ₹1000 — even though A might cancel it later
+
+✅ Fastest, ❌ Not safe (dirty reads)
+
+
+
+🔹 2. Read Committed (Default in most databases)
+
+✅ You can only see committed (saved) changes
+❗ But if someone updates the data again, your next read may give different result
+
+Example:
+
+You check your bank balance: ₹2000
+In the meantime, someone transfers ₹500
+You check again — now it’s ₹1500
+
+✅ Safer than Read Uncommitted
+❌ But results can change during the same transaction
+
+
+
+🔹 3. Repeatable Read
+
+✅ You get the same result every time you read
+❗ But new rows can still be added by others
+
+Example:
+
+You read a list of orders → 5 orders
+Even if someone changes a product price, you still see the original 5 orders
+But someone might add a new order and that won’t show until you start a new transaction
+
+✅ Very consistent
+❌ Still allows phantom rows
+
+
+
+🔹 4. Serializable (💯 Safest)
+
+✅ It acts like only one transaction is allowed at a time
+You get perfect accuracy
+
+Example:
+
+You read all orders > ₹1000
+During your transaction, no one can insert, update, or delete rows that affect your result
+
+✅ 100% correct
+❌ Slowest (locks more things)
+
+-----------------------------------------------------------------------------------------
+
+Interviewer: "Can you explain transaction isolation levels?"
+
+You can reply like this:
+“Sure! Isolation levels define how transactions interact when running at the same time.
+There are four main levels:
+
+
+Read Uncommitted – allows dirty reads
+
+Read Committed – only reads committed data
+
+Repeatable Read – keeps data the same throughout the transaction
+
+Serializable – the strictest; it prevents other transactions from making any changes that affect the current one.
+
+
+The higher the level, the safer it is, but also slower. Most databases use Read Committed by default.”`
+    },
+    {
+      id: 47,
+      question: "47. Explain the difference between logical and physical data independence.",
+      answer: "Logical Data Independence: \n\tYou can change the structure of the database (like adding a column) without affecting the programs that use the data. \n\nPhysical Data Independence: \n\tYou can change the way data is stored (like changing from HDD to SSD) without affecting the structure or application.",
+      codeExample: ``
+    },
+    {
+      id: 48,
+      question: "48. How would you handle a situation where millions of rows need to be updated efficiently?",
+      answer: "To update millions of rows efficiently, you can use batch processing or partitioning. \n\nBatch Processing: \n\tBreak the update into smaller chunks to avoid locking the entire table at once. \n\nPartitioning: \n\tDivide the table into smaller parts (partitions) and update each partition separately.",
+      codeExample: `
+Example of Batch Processing:
+
+UPDATE employees
+SET salary = salary * 1.1
+WHERE department = 'Sales'
+LIMIT 1000;
+
+
+
+Example of Partitioning:
+
+CREATE TABLE employees (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    department VARCHAR(50),
+    salary DECIMAL(10, 2)
+) 
+PARTITION BY RANGE (department) (
+    PARTITION sales VALUES LESS THAN ('Sales'),
+    PARTITION marketing VALUES LESS THAN ('Marketing'),
+    PARTITION engineering VALUES LESS THAN ('Engineering')
+);
+`
+    },
+    {
+      id: 49,
+      question: "49. What are the ACID vs. BASE principles in databases?",
+      answer: "ACID: \n\tA - Atomicity: All or nothing, \n\tC - Consistency: Data remains valid, \n\tI - Isolation: Transactions don’t interfere, \n\tD - Durability: Changes are permanent. \n\nBASE: \n\tB - Basically Available: System is available most of the time, \n\tA - Soft state: Data can change over time, \n\tE - Eventually consistent: Data will become consistent eventually.",
+      codeExample: `
+🔸 What is BASE?
+BASE is a design principle used in NoSQL databases (like MongoDB, Cassandra) that focuses on:
+
+  High availability
+  Performance
+  Scalability
+
+
+🔍 BASE Stands For:   
+| Term  | Full Form             | Meaning (in simple words)                                                                         |
+| ----- | --------------------- | --------------------------------------------------------------------------------------------------|
+| B     | Basically Available   | The system is always accessible, even if some parts are slow or fail.                             |
+| A     | Soft State            | The state of the data might change over time, even without new input (due to background syncing). |
+| E     | Eventually Consistent | Data will become correct, but not instantly — it syncs over time.                                 |
+
+
+📘 Real-Life Example: Instagram Likes
+Imagine you like a photo on Instagram:
+
+  1. You hit ❤️ on a post → You see the like count increase immediately.
+
+  2. Your friend might not see your like right away.
+
+  3.After a few seconds (or minutes), your friend sees your like — ✅ data becomes consistent eventually.
+
+This is BASE behavior.
+
+
+
+🔁 BASE vs. ACID (Visual Summary):
+| Feature          | ACID (SQL)                 | BASE (NoSQL)                 |
+| ---------------- | -------------------------- | ---------------------------- |
+| Data Consistency | Strong (Always consistent) | Weak (Eventually consistent) |
+| Availability     | Moderate                   | High                         |
+| Performance      | Slower but safer           | Fast and scalable            |
+| Best For         | Banking, transactions      | Social media, big data       |
+
+   `
+    },
+    {
+      id: 50,
+      question: "50. How do you design a database for a scalable web application?",
+      answer: "To design a scalable database, I would normalize the data to reduce duplication, use indexing for fast queries, choose the right database type (SQL or NoSQL), and apply techniques like replication, sharding, and caching to handle large traffic efficiently.",
+      codeExample: ``
+    },
+    {
+      id: 51,
+      question: "51. How does caching help in DBMS performance?",
+      answer: "Caching helps reduce database load and speed up queries by saving results in memory like Redis. In Django, I use cache.get() and cache.set() to store frequent queries like product lists.",
+      codeExample: `
+⚙️ How to Use Cache in Query (Using Redis Example in Python/Django)
+Step 1: Install Redis
+You can install Redis on your system or use it in cloud (like Redis Cloud).
+
+
+Step 2: Connect Redis to Your Code
+In Python:
+
+pip install redis
+
+
+In Django settings:
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379",
+    }
+}
+
+
+Step 3: Use Cache in Your Query (Example Code)
+
+from django.core.cache import cache
+from .models import Product
+
+def get_ice_cream_products():
+    # Try to get from cache
+    products = cache.get('ice_cream_products')
+
+    if products is None:
+        # Not in cache, fetch from database
+        products = Product.objects.filter(category='Ice Cream')
+        
+        # Save in cache for 1 hour (3600 seconds)
+        cache.set('ice_cream_products', products, timeout=3600)
+    
+    return products
+
+
+✅ Now:
+
+First time: it goes to DB and saves result in cache.
+After that: it uses cached result, no DB call!
+
+
+💡 Important:
+
+When your data updates, remember to clear cache or set short timeouts.
+You can also cache specific parts of a web page or full pages.`
+    },
+    {
+      id: 52,
+      question: "52. What is normalization in real-life database design and why is it crucial?",
+      answer: "Normalization is the process of organizing data in a database so that it removes duplicates, saves space, and avoids errors.",
+      codeExample: `
+🍕 Real-Life Example: Ice Cream Shop Database
+Imagine you have this table:
+
+| Order_ID | Customer_Name | Ice_Cream_Name | Price | Customer_Cityv |
+| ---------| --------------| -------------- | ----- | -------------- |
+| 1        | Raj           | Vanilla        | 100   | Keshod         |
+| 2        | Raj           | Chocolate      | 120   | Keshod         |
+| 3        | Meena         | Vanilla        | 100   | Junagadh       |
+
+🔴 Problems:
+
+Raj's name and city are repeated.
+Vanilla’s price is repeated.
+If price changes, you must update every row (risk of error!).
+
+
+✅ Normalize It (Step-by-Step)
+Step 1: Break into smaller tables.
+
+
+🔸 Customers Table
+| Customer_ID | Name  | City     |
+| ----------- | ----- | -------- |
+| 1           | Raj   | Keshod   |
+| 2           | Meena | Junagadh |
+
+
+🔸 IceCream Table
+| IceCream_ID | Name      | Price |
+| ----------- | --------- | ----- |
+| 1           | Vanilla   | 100   |
+| 2           | Chocolate | 120   |
+
+
+🔸 Orders Table
+| Order_ID | Customer_ID | IceCream_ID |
+| -------- | ----------- | ----------- |
+| 1        | 1           | 1           |
+| 2        | 1           | 2           |
+| 3        | 2           | 1           |
+
+`
+    },
     
   ];
 
